@@ -177,10 +177,13 @@ void GeneratorScreen::Save(int nb_move) {
     nb_player_move = std::min(nb_player_move, nb_move);
   }
 
-  std::ofstream file(SavePath() + "/generated_level/list");
-  for (int i = 0; i < (int)entries.size() - 1; ++i) {
-    auto& entry = entries[i];
-    file << entry.name << std::endl;
-    file << entry.nb_move_player << std::endl;
+  {
+    std::ofstream file(SavePath() + "/generated_level/list");
+    for (int i = 0; i < (int)entries.size() - 1; ++i) {
+      auto& entry = entries[i];
+      file << entry.name << std::endl;
+      file << entry.nb_move_player << std::endl;
+    }
   }
+  SyncFilesystem();
 }

@@ -186,54 +186,57 @@ void Plateau::Load(const std::string& filename) {
 }
 
 void Plateau::Save(const std::string& filename) {
-  int x, y, i;
+  {
+    int x, y, i;
 
-  std::ofstream file(filename, std::ios::out | std::ios::trunc);
+    std::ofstream file(filename, std::ios::out | std::ios::trunc);
 
-  // save block
-  file << block.x << std::endl
-       << block.y << std::endl
-       << block.a << std::endl
-       << block.b << std::endl
-       << block.c << std::endl;
+    // save block
+    file << block.x << std::endl
+         << block.y << std::endl
+         << block.a << std::endl
+         << block.b << std::endl
+         << block.c << std::endl;
 
-  // save dimentions
-  file << width << std::endl << height << std::endl;
+    // save dimentions
+    file << width << std::endl << height << std::endl;
 
-  NeedDelete = true;
+    NeedDelete = true;
 
-  // save element of the grid
-  for (y = 0; y < height; ++y)
-    for (x = 0; x < width; ++x) {
-      Plateau_element& p = elements[x][y];
+    // save element of the grid
+    for (y = 0; y < height; ++y)
+      for (x = 0; x < width; ++x) {
+        Plateau_element& p = elements[x][y];
 
-      // tweak to do fs<<p.type
-      file << p.type << std::endl;
+        // tweak to do fs<<p.type
+        file << p.type << std::endl;
 
-      switch (p.type) {
-        case Type::BUTTON: {
-          file << p.button.nbTarget << std::endl;
-          file << p.button.minWeight << std::endl;
-          for (i = 0; i < p.button.nbTarget; ++i) {
-            file << p.button.target[i].x << std::endl;
-            file << p.button.target[i].y << std::endl;
-            file << p.button.target[i].mode << std::endl;
-          }
-        } break;
+        switch (p.type) {
+          case Type::BUTTON: {
+            file << p.button.nbTarget << std::endl;
+            file << p.button.minWeight << std::endl;
+            for (i = 0; i < p.button.nbTarget; ++i) {
+              file << p.button.target[i].x << std::endl;
+              file << p.button.target[i].y << std::endl;
+              file << p.button.target[i].mode << std::endl;
+            }
+          } break;
 
-        case Type::RETRACTABLE: {
-          file << p.retractable.state << std::endl;
-          file << p.retractable.direction << std::endl;
-        } break;
+          case Type::RETRACTABLE: {
+            file << p.retractable.state << std::endl;
+            file << p.retractable.direction << std::endl;
+          } break;
 
-        case Type::FRAGILE: {
-          file << p.fragile.maxWeight << std::endl;
-        } break;
+          case Type::FRAGILE: {
+            file << p.fragile.maxWeight << std::endl;
+          } break;
 
-        default:
-          break;
+          default:
+            break;
+        }
       }
-    }
+  }
+  SyncFilesystem();
 }
 
 void Plateau::Step() {

@@ -24,7 +24,6 @@ extern smk::Texture texture_box_press_enter;
 extern smk::Texture texture_box_title;
 extern smk::Texture texture_dalle;
 extern smk::Texture texture_dalleback;
-extern smk::Texture texture_finish;
 extern smk::Texture texture_fragile1;
 extern smk::Texture texture_fragile2;
 extern smk::Texture texture_fragile3;

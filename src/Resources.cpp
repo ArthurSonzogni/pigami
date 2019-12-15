@@ -60,9 +60,7 @@ std::string SavePath() {
 
 #ifdef __EMSCRIPTEN__
   save_path = "/sav";
-  return save_path;
-#endif
-
+#else
   auto SNAP_USER_COMMON = GetEnvironmentVariable("SNAP_USER_COMMON");
   auto HOME = GetEnvironmentVariable("HOME");
 
@@ -75,6 +73,7 @@ std::string SavePath() {
   }
 
   save_path += "/.config/pigami";
+#endif
   std::cout << "Save path = " << save_path << std::endl;
   return save_path;
 }
@@ -88,14 +87,12 @@ smk::Texture texture_box_press_enter;
 smk::Texture texture_box_title;
 smk::Texture texture_dalle;
 smk::Texture texture_dalleback;
-smk::Texture texture_finish;
 smk::Texture texture_fragile1;
 smk::Texture texture_fragile2;
 smk::Texture texture_fragile3;
 smk::Texture texture_left_arrow;
 smk::Texture texture_level_background;
 smk::Texture texture_level_circle;
-smk::Texture texture_number_little;
 smk::Texture texture_number;
 smk::Texture texture_press_enter;
 smk::Texture texture_retractable;
@@ -133,14 +130,12 @@ std::map<smk::Texture*, std::string> image_resources{
     {&texture_box_title, "/img/box_title.png"},
     {&texture_dalle, "/img/dalle.png"},
     {&texture_dalleback, "/img/dalleback.png"},
-    {&texture_finish, "/img/finish.png"},
     {&texture_fragile1, "/img/fragile1.jpg"},
     {&texture_fragile2, "/img/fragile2.png"},
     {&texture_fragile3, "/img/fragile3.png"},
     {&texture_left_arrow, "/img/left_arrow.png"},
     {&texture_level_background, "/img/level_background.png"},
     {&texture_level_circle, "/img/level_circle.png"},
-    {&texture_number_little, "/img/number_little.png"},
     {&texture_number, "/img/number.png"},
     {&texture_press_enter, "/img/press_enter.png"},
     {&texture_retractable, "/img/retractable.png"},
