@@ -67,12 +67,11 @@ std::string SavePath() {
   if (!SNAP_USER_COMMON.empty()) {
     save_path = SNAP_USER_COMMON;
   } else if (!HOME.empty()) {
-    save_path = HOME + "/";
+    save_path = HOME + "/.config/pigami";
   } else {
     save_path = ".";
   }
 
-  save_path += "/.config/pigami";
 #endif
   std::cout << "Save path = " << save_path << std::endl;
   return save_path;
