@@ -12,9 +12,7 @@ confinement: strict
 base: core18
 apps:
   pigami:
-    command: ./usr/local/bin/pigami
-    environment:
-      ALSOFT_CONF: $SNAP/etc/openal/alsoft.conf
+    command: desktop-launch ${SNAP}/usr/local/bin/pigami
     plugs:
       - audio-playback
       - opengl
@@ -44,7 +42,6 @@ parts:
     stage-packages:
       - libgl1-mesa-glx
       - libpulse0
-      - libpng16-16
     build-packages:
       - libglu-dev
       - libssl1.0-dev
@@ -58,14 +55,14 @@ parts:
       make -j 4
       make install
 
-  #desktop-glib-only:
-    #plugin: make
-    #source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    #source-subdir: glib-only
-    #build-packages:
-    #- libglib2.0-dev
-    #stage-packages:
-    #- libglib2.0-bin
+  desktop-glib-only:
+    plugin: make
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: glib-only
+    build-packages:
+    - libglib2.0-dev
+    stage-packages:
+    - libglib2.0-bin
 
 passthrough:
   title: pigami
