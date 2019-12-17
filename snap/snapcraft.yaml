@@ -13,9 +13,11 @@ base: core18
 apps:
   pigami:
     command: ./usr/local/bin/pigami
+    environment:
+      ALSOFT_CONF: $SNAP/etc/openal/alsoft.conf
     plugs:
+      - audio-playback
       - opengl
-      - pulseaudio
       - x11
 parts:
 
