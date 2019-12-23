@@ -9,8 +9,8 @@
 
 class GeneratorScreen : public Activity {
  public:
-  GeneratorScreen(smk::Screen& screen, Activity* background_activity)
-      : Activity(screen), background_activity_(background_activity) {}
+  GeneratorScreen(smk::Window& window, Activity* background_activity)
+      : Activity(window), background_activity_(background_activity) {}
   ~GeneratorScreen() override = default;
 
   void Animate() override;

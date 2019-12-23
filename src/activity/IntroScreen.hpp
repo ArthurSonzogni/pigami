@@ -7,7 +7,7 @@
 
 class IntroScreen : public Activity {
  public:
-  IntroScreen(smk::Screen& screen) : Activity(screen) {}
+  IntroScreen(smk::Window& window) : Activity(window) {}
   ~IntroScreen() override = default;
 
   void Animate() override;

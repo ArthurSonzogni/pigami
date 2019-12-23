@@ -306,10 +306,10 @@ void Plateau::Step() {
   }
 }
 
-void Plateau::Draw(smk::Screen* screen,
+void Plateau::Draw(smk::Window* window,
                    float screen_width,
                    float screen_height) {
-  screen_ = screen;
+  screen_ = window;
   glm::mat4 projection =
       glm::perspective(70.f, float(screen_width / screen_height), 5.f, 30.f);
 
@@ -650,7 +650,7 @@ void Plateau::ActiveExtScreen(int max_move) {
   show_nb_move = true;
 }
 
-void Block::Draw(smk::Screen* screen,
+void Block::Draw(smk::Window* window,
                  glm::mat4 view,
                  bool shadow,
                  bool reflet) {
@@ -817,7 +817,7 @@ void Block::Draw(smk::Screen* screen,
   view = glm::translate(view, {0.5f, 0.5f, 0.5f});
   cube.SetTransformation(view);
   cube.SetTexture(texture_block);
-  screen->Draw(cube);
+  window->Draw(cube);
 }
 
 bool Plateau::GroundOn(int x, int y) {

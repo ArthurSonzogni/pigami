@@ -17,8 +17,8 @@ void LevelSelector::OnEnter() {
 void LevelSelector::Step() {
   background_activity_->Animate();
   background_alpha_ += (0.8 - background_alpha_) * 0.01;
-  if (screen().input().IsKeyReleased(GLFW_KEY_ENTER) ||
-      screen().input().IsKeyReleased(GLFW_KEY_SPACE)) {
+  if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
+      window().input().IsKeyReleased(GLFW_KEY_SPACE)) {
     PlaySound(sound_menu_select);
     if (selection_level_selected == nb_level - 1)
       on_generator();
@@ -28,9 +28,9 @@ void LevelSelector::Step() {
 
   int selection_level_selected_previous = selection_level_selected;
 
-  if (screen().input().IsKeyPressed(GLFW_KEY_LEFT))
+  if (window().input().IsKeyPressed(GLFW_KEY_LEFT))
     selection_level_selected--;
-  if (screen().input().IsKeyPressed(GLFW_KEY_RIGHT))
+  if (window().input().IsKeyPressed(GLFW_KEY_RIGHT))
     selection_level_selected++;
 
   selection_level_selected = std::max(selection_level_selected, 0);
@@ -59,7 +59,7 @@ void LevelSelector::Step() {
 void LevelSelector::Draw() {
   background_activity_->Draw();
 
-  screen().SetShaderProgram(screen().shader_program_2d());
+  window().SetShaderProgram(window().shader_program_2d());
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_STENCIL_TEST);
@@ -71,24 +71,24 @@ void LevelSelector::Draw() {
     smk::View view;
     view.SetCenter(0.5f, 0.5f);
     view.SetSize(1.f, 1.f);
-    screen().SetView(view);
+    window().SetView(view);
 
     auto square = smk::Shape::Square();
     square.SetColor({0.f, 0.f, 0.f, background_alpha_});
-    screen().Draw(square);
+    window().Draw(square);
   }
 
   // Set the view.
   float margin = 10.f;
-  float width = screen().width();
-  float height = screen().height();
+  float width = window().width();
+  float height = window().height();
   float zoom = std::min(width / 640.f, height / 480.f);
   width /= zoom;
   height /= zoom;
   smk::View view;
   view.SetCenter(320.f, 240.f);
   view.SetSize(width, height);
-  screen().SetView(view);
+  window().SetView(view);
 
   // Display the level number.
   float number_dx = texture_number.width / 4.f;
@@ -104,7 +104,7 @@ void LevelSelector::Draw() {
                                        number_dy * (y + 1)});
     number_sprite.SetPosition(320.f - number_dx * 0.5f,
                               240.f - number_dy * 0.5f);
-    screen().Draw(number_sprite);
+    window().Draw(number_sprite);
   }
 
   // Helper function. Returns the positions of the circles.
@@ -123,7 +123,7 @@ void LevelSelector::Draw() {
         float a = std::max(0.f, alpha_[i] * 2.f - 1.f) * 0.1;
         line.SetColor({1.f, 1.f, 1.f, a});
         line.SetBlendMode(smk::BlendMode::Add);
-        screen().Draw(line);
+        window().Draw(line);
       }
     }
   }
@@ -140,7 +140,7 @@ void LevelSelector::Draw() {
                                -texture_level_circle.height * 0.5 * scale);
       float a = std::min(1.f, alpha_[i] * 2.f / 1.f);
       sprite_level_circle.SetColor({1.f, 1.f, 1.f, a});
-      screen().Draw(sprite_level_circle);
+      window().Draw(sprite_level_circle);
     }
   }
 
@@ -151,7 +151,7 @@ void LevelSelector::Draw() {
     sprite.SetPosition(320 - number_dx * 0.5, 240);
     sprite.SetColor({1.0, 1.0, 1.0, left_arrow_alpha_});
     sprite.Move(-texture_left_arrow.width, -texture_left_arrow.height * 0.5);
-    screen().Draw(sprite);
+    window().Draw(sprite);
   }
 
   // Right arrow.
@@ -161,7 +161,7 @@ void LevelSelector::Draw() {
     sprite.SetPosition(320 + number_dx * 0.5, 240);
     sprite.SetColor({1.0, 1.0, 1.0, right_arrow_alpha_});
     sprite.Move(0, -texture_right_arrow.height * 0.5);
-    screen().Draw(sprite);
+    window().Draw(sprite);
   }
 
   // Press enter.
@@ -171,9 +171,9 @@ void LevelSelector::Draw() {
     sprite.SetPosition(
         320 + width * 0.5 - texture_press_enter.width - margin,
         240 + height * 0.5 - texture_press_enter.height - margin);
-    float alpha_ = 0.5 + 0.5 * sin(screen().time() * 8.f);
+    float alpha_ = 0.5 + 0.5 * sin(window().time() * 8.f);
     sprite.SetColor({1.f, 1.f, 1.f, alpha_});
     sprite.SetBlendMode(smk::BlendMode::Add);
-    screen().Draw(sprite);
+    window().Draw(sprite);
   }
 }

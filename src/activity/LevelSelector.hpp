@@ -5,8 +5,8 @@
 
 class LevelSelector : public Activity {
  public:
-  LevelSelector(smk::Screen& screen, Activity* background_activity)
-      : Activity(screen), background_activity_(background_activity) {}
+  LevelSelector(smk::Window& window, Activity* background_activity)
+      : Activity(window), background_activity_(background_activity) {}
   ~LevelSelector() override = default;
 
   std::function<void()> on_selected = [] {};

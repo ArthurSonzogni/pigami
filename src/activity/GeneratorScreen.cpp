@@ -15,7 +15,7 @@ GeneratorScreen::Entry GeneratorScreen::BuildEntry(std::string level,
   plateau->Load(SavePath() + "/generated_level/" + level);
   int min_movement = Evaluation(*plateau);
 
-  float dim = 0.5 * std::max(screen().width(), screen().height());
+  float dim = 0.5 * std::max(window().width(), window().height());
   auto framebuffer = Framebuffer(dim, dim);
   framebuffer.Bind();
   //glm::mat4 projection = glm::perspective(70.f, 1.f, 1.f, 40.f);
@@ -24,9 +24,9 @@ GeneratorScreen::Entry GeneratorScreen::BuildEntry(std::string level,
   //glm::vec3 up_direction = {0.f, 0.f, 1.f};
   //glm::vec3 eye = camera_target + 2.f * glm::vec3(-2.f, -5.f, 5.f);
   //glm::mat4 view = glm::lookAt(eye, camera_target, up_direction);
-  //screen().SetView(view);
+  //window().SetView(view);
 
-  screen().SetShaderProgram(screen().shader_program_3d());
+  window().SetShaderProgram(window().shader_program_3d());
 
   glClearColor(0.5f, 1.f, 1.f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -34,7 +34,7 @@ GeneratorScreen::Entry GeneratorScreen::BuildEntry(std::string level,
   glDisable(GL_CULL_FACE);
   glDisable(GL_DEPTH_TEST);
   glViewport(0, 0, dim, dim);
-  plateau->Draw(&screen(), dim, dim);
+  plateau->Draw(&window(), dim, dim);
   framebuffer.GenerateMipmap();
   framebuffer.Unbind();
 
@@ -56,7 +56,7 @@ void GeneratorScreen::OnEnter() {
     entries.push_back(BuildEntry(level, std::stoi(score)));
   entries.push_back({"Generate", nullptr, 0, 0, smk::Texture()});
   generate_dy_ = -10.f;
-  glViewport(-1, -1, screen().width(), screen().height());
+  glViewport(-1, -1, window().width(), window().height());
 }
 
 void GeneratorScreen::Animate() {
@@ -69,8 +69,8 @@ void GeneratorScreen::Animate() {
 }
 
 void GeneratorScreen::Step() {
-  if (screen().input().IsKeyReleased(GLFW_KEY_ENTER) ||
-      screen().input().IsKeyReleased(GLFW_KEY_SPACE)) {
+  if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
+      window().input().IsKeyReleased(GLFW_KEY_SPACE)) {
     PlaySound(sound_menu_select);
     if (selected_index == (int)entries.size() - 1)
       on_generate();
@@ -80,9 +80,9 @@ void GeneratorScreen::Step() {
   int selected_index_previous = selected_index;
 
   // clang-format off
-  if (screen().input().IsKeyPressed(GLFW_KEY_LEFT)) selected_index--;
-  if (screen().input().IsKeyPressed(GLFW_KEY_RIGHT)) selected_index++;
-  if (screen().input().IsKeyPressed(GLFW_KEY_ESCAPE)) on_quit();
+  if (window().input().IsKeyPressed(GLFW_KEY_LEFT)) selected_index--;
+  if (window().input().IsKeyPressed(GLFW_KEY_RIGHT)) selected_index++;
+  if (window().input().IsKeyPressed(GLFW_KEY_ESCAPE)) on_quit();
   // clang-format on
 
   Animate();
@@ -95,7 +95,7 @@ void GeneratorScreen::Step() {
 }
 
 void GeneratorScreen::Draw() {
-  screen().Clear(smk::Color::Black);
+  window().Clear(smk::Color::Black);
   background_activity_->Draw();
 
   glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -104,20 +104,20 @@ void GeneratorScreen::Draw() {
   glDisable(GL_DEPTH_TEST);
 
   // Set the view.
-  float width = screen().width();
-  float height = screen().height();
+  float width = window().width();
+  float height = window().height();
   float zoom = std::min(width, height);
   smk::View view;
   view.SetCenter(0, 0);
   view.SetSize(width / zoom, height / zoom);
-  screen().SetShaderProgram(screen().shader_program_2d());
-  screen().SetView(view);
+  window().SetShaderProgram(window().shader_program_2d());
+  window().SetView(view);
 
   auto square = smk::Shape::Square();
   square.SetColor({0.f, 0.f, 0.f, 0.9});
   square.SetScale(width / zoom, height / zoom);
   square.SetPosition(-width / zoom * 0.5, -height / zoom * 0.5);
-  screen().Draw(square);
+  window().Draw(square);
 
   auto draw_level = [&](int level) {
     float dx = (level - selected_index_x) * 0.6;
@@ -130,14 +130,14 @@ void GeneratorScreen::Draw() {
       // sprite.SetColor(entries[level].color);
       sprite.SetPosition(dx - 0.25, -0.2 + 0.5 + dy);
       sprite.SetScale(0.5 / texture.width, -0.5 / texture.height);
-      screen().Draw(sprite);
+      window().Draw(sprite);
     }
 
     {
       square.SetPosition(dx - 0.25, -0.2 + dy);
       square.SetScale(0.5, 0.1);
       square.SetColor({0.f, 0.f, 0.f, 0.2f});
-      screen().Draw(square);
+      window().Draw(square);
     }
 
     // Title.
@@ -148,7 +148,7 @@ void GeneratorScreen::Draw() {
       text.SetColor(smk::Color::White);
       text.SetScale(scale, scale);
       text.SetPosition(dx - dimension.x * 0.5 * scale, -0.2f + dy);
-      screen().Draw(text);
+      window().Draw(text);
     }
 
     // Min_movement.
@@ -161,7 +161,7 @@ void GeneratorScreen::Draw() {
       text.SetColor(smk::Color::White);
       text.SetScale(scale, scale);
       text.SetPosition(dx - dimension.x * 0.5 * scale, -0.2f + dy + 0.5);
-      screen().Draw(text);
+      window().Draw(text);
     }
   };
 

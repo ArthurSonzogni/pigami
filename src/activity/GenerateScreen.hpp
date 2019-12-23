@@ -7,8 +7,8 @@
 
 class GenerateScreen : public Activity {
  public:
-  GenerateScreen(smk::Screen& screen, Activity* background_activity)
-      : Activity(screen), background_activity_(background_activity) {}
+  GenerateScreen(smk::Window& window, Activity* background_activity)
+      : Activity(window), background_activity_(background_activity) {}
   ~GenerateScreen() override = default;
 
   void Animate() override;
@@ -21,6 +21,7 @@ class GenerateScreen : public Activity {
 
   int size_x = 0;
   int size_y = 0;
+
  private:
   void Save();
 

@@ -7,7 +7,7 @@
 
 class LevelScreen : public Activity {
  public:
-  LevelScreen(smk::Screen& screen) : Activity(screen) {}
+  LevelScreen(smk::Window& window) : Activity(window) {}
   ~LevelScreen() override = default;
 
   void Step() override;

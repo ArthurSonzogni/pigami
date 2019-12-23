@@ -27,17 +27,17 @@ void IntroScreen::OnEnter() {
 }
 
 void IntroScreen::Step() {
-  if (screen().input().IsKeyHold(GLFW_KEY_LEFT))
+  if (window().input().IsKeyHold(GLFW_KEY_LEFT))
     plateau.block.Move(left);
-  if (screen().input().IsKeyHold(GLFW_KEY_RIGHT))
+  if (window().input().IsKeyHold(GLFW_KEY_RIGHT))
     plateau.block.Move(right);
-  if (screen().input().IsKeyHold(GLFW_KEY_UP))
+  if (window().input().IsKeyHold(GLFW_KEY_UP))
     plateau.block.Move(up);
-  if (screen().input().IsKeyHold(GLFW_KEY_DOWN))
+  if (window().input().IsKeyHold(GLFW_KEY_DOWN))
     plateau.block.Move(down);
-  if (screen().input().IsKeyReleased(GLFW_KEY_ENTER) ||
-      screen().input().IsKeyReleased(GLFW_KEY_SPACE) ||
-      screen().input().IsKeyReleased(GLFW_KEY_ESCAPE)) {
+  if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
+      window().input().IsKeyReleased(GLFW_KEY_SPACE) ||
+      window().input().IsKeyReleased(GLFW_KEY_ESCAPE)) {
     on_quit();
   }
   Animate();
@@ -57,9 +57,9 @@ void IntroScreen::Animate() {
 }
 
 void IntroScreen::Draw() {
-  screen().Clear(smk::Color::Black);
+  window().Clear(smk::Color::Black);
   //glm::mat4 projection = glm::perspective(
-      //70.f, float(screen().width()) / screen().height(), 1.f, 40.f);
+      //70.f, float(window().width()) / window().height(), 1.f, 40.f);
 
   //float alpha = step * 0.0025f;
 
@@ -68,10 +68,10 @@ void IntroScreen::Draw() {
   //glm::vec3 up_direction = {0.f, 0.f, 1.f};
   //auto view = glm::lookAt(eye, camera_position, up_direction);
 
-  //screen().SetShaderProgram(screen().shader_program_3d());
-  //screen().Clear(smk::Color::Black);
+  //window().SetShaderProgram(window().shader_program_3d());
+  //window().Clear(smk::Color::Black);
   //glClear(GL_STENCIL_BUFFER_BIT);
-  //screen().SetView(view);
+  //window().SetView(view);
 
-  plateau.Draw(&screen(), screen().width(), screen().height());
+  plateau.Draw(&window(), window().width(), window().height());
 }

@@ -3,7 +3,7 @@
 #include <locale>
 #include <smk/Audio.hpp>
 #include <smk/Input.hpp>
-#include <smk/Screen.hpp>
+#include <smk/Window.hpp>
 #include <smk/Shape.hpp>
 #include <smk/Sound.hpp>
 #include <smk/Text.hpp>
@@ -19,13 +19,13 @@
 class Main {
  public:
   Main()
-      : resource_loading_screen_(screen_),
-        intro_screen_(screen_),
-        level_selector_(screen_, &intro_screen_),
-        level_screen_(screen_),
-        generator_screen_(screen_, &intro_screen_),
-        generate_screen_(screen_, &generator_screen_) {
-    screen_ = smk::Screen(640, 480, "Pigami");
+      : resource_loading_screen_(window_),
+        intro_screen_(window_),
+        level_selector_(window_, &intro_screen_),
+        level_screen_(window_),
+        generator_screen_(window_, &intro_screen_),
+        generate_screen_(window_, &generator_screen_) {
+    window_ = smk::Window(640, 480, "Pigami");
     Display(&resource_loading_screen_);
 
     // ─────────── ResourceLoadingScreen ───────────
@@ -85,7 +85,7 @@ class Main {
 
     // --
     frame = 0;
-    start_time = screen_.time();
+    start_time = window_.time();
   }
 
   void Display(Activity* activity) {
@@ -97,7 +97,7 @@ class Main {
   }
 
   void Loop() {
-    float new_time = screen_.time();
+    float new_time = window_.time();
     int new_frame = (new_time - start_time) * 120;
 
     if (new_frame > frame + 10) {
@@ -109,16 +109,16 @@ class Main {
 
     // ---- Step part ----
     while (frame < new_frame) {
-      screen_.PoolEvents();
+      window_.PoolEvents();
       activity_->Step();
       ++frame;
     }
 
     // ---- Draw part ----
     activity_->Draw();
-    screen_.Display();
+    window_.Display();
 #ifndef __EMSCRIPTEN__
-    screen_.LimitFrameRate(60.f);
+    window_.LimitFrameRate(60.f);
 #endif
 
     // ---- Background music
@@ -130,7 +130,7 @@ class Main {
 
  private:
   Activity* activity_;
-  smk::Screen screen_;
+  smk::Window window_;
 
   ResourceLoadingScreen resource_loading_screen_;
   IntroScreen intro_screen_;

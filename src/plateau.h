@@ -3,7 +3,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <smk/OpenGL.hpp>
-#include <smk/Screen.hpp>
+#include <smk/Window.hpp>
 #include <string>
 
 constexpr int animation_step = 120;
@@ -92,7 +92,7 @@ class Block {
   int falling_position = 0;
 
   void Move(Direction direction);
-  void Draw(smk::Screen* screen, glm::mat4 view, bool shadow, bool reflet);
+  void Draw(smk::Window* window, glm::mat4 view, bool shadow, bool reflet);
 };
 
 class Plateau {
@@ -116,7 +116,7 @@ class Plateau {
   void Load(const std::string& filename);
   void Save(const std::string& filename);
   void Step();
-  void Draw(smk::Screen* screenn, float screen_width, float screen_height);
+  void Draw(smk::Window* window, float screen_width, float screen_height);
   void InitGl();
 
   bool GroundOn(int x,
@@ -130,7 +130,7 @@ class Plateau {
 
   void copie(Plateau& p);
 
-  smk::Screen* screen_ = nullptr;
+  smk::Window* screen_ = nullptr;
   void DrawGround(glm::mat4 view);
   void DrawRetractable(Retractable& r, glm::mat4 view);
   void DrawButton(glm::mat4 view, int minWeight);

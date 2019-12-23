@@ -18,17 +18,17 @@ void LevelScreen::OnEnter() {
 }
 
 void LevelScreen::Step() {
-  if (screen().input().IsKeyHold(GLFW_KEY_LEFT))
+  if (window().input().IsKeyHold(GLFW_KEY_LEFT))
     plateau->block.Move(left);
-  if (screen().input().IsKeyHold(GLFW_KEY_RIGHT))
+  if (window().input().IsKeyHold(GLFW_KEY_RIGHT))
     plateau->block.Move(right);
-  if (screen().input().IsKeyHold(GLFW_KEY_UP))
+  if (window().input().IsKeyHold(GLFW_KEY_UP))
     plateau->block.Move(up);
-  if (screen().input().IsKeyHold(GLFW_KEY_DOWN))
+  if (window().input().IsKeyHold(GLFW_KEY_DOWN))
     plateau->block.Move(down);
-  if (screen().input().IsKeyReleased(GLFW_KEY_ENTER) ||
-      screen().input().IsKeyReleased(GLFW_KEY_SPACE) ||
-      screen().input().IsKeyReleased(GLFW_KEY_ESCAPE)) {
+  if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
+      window().input().IsKeyReleased(GLFW_KEY_SPACE) ||
+      window().input().IsKeyReleased(GLFW_KEY_ESCAPE)) {
     on_quit();
   }
 
@@ -42,6 +42,6 @@ void LevelScreen::Step() {
 }
 
 void LevelScreen::Draw() {
-  screen().Clear(smk::Color::Black);
-  plateau->Draw(&screen(), screen().width(), screen().height());
+  window().Clear(smk::Color::Black);
+  plateau->Draw(&window(), window().width(), window().height());
 }
