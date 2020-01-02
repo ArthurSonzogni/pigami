@@ -6,6 +6,7 @@
 #include <smk/Input.hpp>
 #include <smk/Sprite.hpp>
 #include <smk/Text.hpp>
+#include <smk/Vibrate.hpp>
 #include "Generator.hpp"
 #include "Resources.hpp"
 #include "plateau.h"
@@ -30,6 +31,28 @@ void LevelScreen::Step() {
       window().input().IsKeyReleased(GLFW_KEY_SPACE) ||
       window().input().IsKeyReleased(GLFW_KEY_ESCAPE)) {
     on_quit();
+  }
+
+  float trigger = std::min(window().width(), window().height()) * 0.2f;
+  for (auto& it : window().input().touches()) {
+    auto& touch = it.second;
+    auto delta =
+        touch.data_points.back().position - touch.data_points.front().position;
+    std::cerr << "delta = " << glm::length(delta) << std::endl;
+    if (glm::length(delta) < trigger)
+      continue;
+    smk::Vibrate(20);
+    touch.data_points = {touch.data_points.back()};
+
+    delta = glm::normalize(delta);
+    if (delta.x > +0.5f)
+      plateau->block.Move(right);
+    if (delta.x < -0.5f)
+      plateau->block.Move(left);
+    if (delta.y > +0.5f)
+      plateau->block.Move(down);
+    if (delta.y < -0.5f)
+      plateau->block.Move(up);
   }
 
   if (plateau->IsLevelWinned())

@@ -19,6 +19,9 @@ class LevelScreen : public Activity {
   std::function<void()> on_lose = []{};
   std::string level_path;
   std::unique_ptr<Plateau> plateau;
+ private:
+  int finger_id;
+  glm::vec2 finger_position;
 };
 
 #endif /* end of include guard: LEVEL_SCREEN_HPP */

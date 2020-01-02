@@ -1,32 +1,62 @@
-#include <iostream>
 #include "activity/LevelSelector.hpp"
 #include <cmath>
+#include <iostream>
+#include <smk/BlendMode.hpp>
 #include <smk/Color.hpp>
 #include <smk/Shape.hpp>
-#include <smk/BlendMode.hpp>
 #include <smk/Sprite.hpp>
 #include <smk/Text.hpp>
+#include <smk/Vibrate.hpp>
 #include "Resources.hpp"
 #include "save.hpp"
 
 void LevelSelector::OnEnter() {
   max_level = save::max_level();
   max_level = std::min(max_level, nb_level - 2);
+  view_dy_ = 0.f;
 }
 
 void LevelSelector::Step() {
   background_activity_->Animate();
   background_alpha_ += (0.8 - background_alpha_) * 0.01;
   if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
-      window().input().IsKeyReleased(GLFW_KEY_SPACE)) {
+      window().input().IsKeyReleased(GLFW_KEY_SPACE) ||
+      (selected_by_touch_ && window().input().IsCursorReleased())) {
     PlaySound(sound_menu_select);
     if (selection_level_selected == nb_level - 1)
       on_generator();
     else
       on_selected();
+    smk::Vibrate(50);
   }
 
   int selection_level_selected_previous = selection_level_selected;
+
+  float trigger = std::min(window().width(), window().height()) * 0.2f;
+  bool must_select_by_touch = false;
+  float view_dy_target = 0.f;
+  for(auto& it : window().input().touches()) {
+    auto& touch = it.second;
+    auto delta =
+        touch.data_points.back().position - touch.data_points.front().position;
+    std::cerr << "delta = " << glm::length(delta) << std::endl;
+    if (glm::length(delta) < trigger)
+      continue;
+    view_dy_target = delta.y;
+    delta = glm::normalize(delta);
+    if (std::abs(delta.y) > +0.5f) {
+      if (!selected_by_touch_)
+        smk::Vibrate(20);
+      must_select_by_touch = true;
+      continue;
+    }
+    if (delta.x > +0.5f) selection_level_selected++;
+    if (delta.x < -0.5f) selection_level_selected--;
+    // 'Consume' the datapoint.
+    touch.data_points = {touch.data_points.back()};
+  }
+  selected_by_touch_ = must_select_by_touch;
+  view_dy_ += (view_dy_target - view_dy_) * 0.1f;
 
   if (window().input().IsKeyPressed(GLFW_KEY_LEFT))
     selection_level_selected--;
@@ -36,16 +66,17 @@ void LevelSelector::Step() {
   selection_level_selected = std::max(selection_level_selected, 0);
   selection_level_selected = std::min(selection_level_selected, max_level + 1);
 
-  if (selection_level_selected_previous != selection_level_selected)
+  if (selection_level_selected_previous != selection_level_selected) {
     PlaySound(sound_menu_change);
+    smk::Vibrate(20);
+  }
 
   // Compute alpha_ for every elements
   {
     for (int i = 0; i < nb_level; ++i) {
       float target = selection_level_selected >= i ? 1.f : 0.f;
       alpha_[i] += (target - alpha_[i]) * 0.1;
-    }
-    alpha_[nb_level] = alpha_[nb_level - 1];
+    } alpha_[nb_level] = alpha_[nb_level - 1];
 
     float left_arrow_alpha_target = selection_level_selected == 0 ? 0.f : 1.f;
     float right_arrow_alpha_target =
@@ -86,7 +117,7 @@ void LevelSelector::Draw() {
   width /= zoom;
   height /= zoom;
   smk::View view;
-  view.SetCenter(320.f, 240.f);
+  view.SetCenter(320.f, 240.f - view_dy_ / zoom);
   view.SetSize(width, height);
   window().SetView(view);
 

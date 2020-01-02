@@ -27,19 +27,15 @@ void IntroScreen::OnEnter() {
 }
 
 void IntroScreen::Step() {
-  if (window().input().IsKeyHold(GLFW_KEY_LEFT))
-    plateau.block.Move(left);
-  if (window().input().IsKeyHold(GLFW_KEY_RIGHT))
-    plateau.block.Move(right);
-  if (window().input().IsKeyHold(GLFW_KEY_UP))
-    plateau.block.Move(up);
-  if (window().input().IsKeyHold(GLFW_KEY_DOWN))
-    plateau.block.Move(down);
   if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
       window().input().IsKeyReleased(GLFW_KEY_SPACE) ||
       window().input().IsKeyReleased(GLFW_KEY_ESCAPE)) {
     on_quit();
   }
+
+  if (window().input().IsCursorPressed())
+    on_quit();
+
   Animate();
 }
 

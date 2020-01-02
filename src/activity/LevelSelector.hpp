@@ -25,6 +25,8 @@ class LevelSelector : public Activity {
   float left_arrow_alpha_ = 0.f;
   float right_arrow_alpha_ = 0.f;
   float background_alpha_ = 0.f;
+  bool selected_by_touch_ = false;
+  float view_dy_ = 0.f;
 };
 
 #endif /* end of include guard: ACTIVITY_LEVEL_SELECTOR_HPP */
