@@ -1,3 +1,7 @@
+// Copyright 2019 Arthur Sonzogni. All rights reserved.
+// Use of this source code is governed by the MIT license that can be found in
+// the LICENSE file.
+
 #ifndef ACTIVITY_GENERATOR_SCREEN_HPP
 #define ACTIVITY_GENERATOR_SCREEN_HPP
 
