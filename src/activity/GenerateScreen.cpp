@@ -123,6 +123,9 @@ void GenerateScreen::Save() {
   std::vector<std::string> level_list;
   std::vector<std::string> level_score;
   {
+#ifdef __EMSCRIPTEN__
+    EM_ASM(FS.mkdir("/sav/generated_level"););
+#endif
     std::ifstream file(SavePath() + "/generated_level/list");
     std::string level;
     std::string score;

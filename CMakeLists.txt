@@ -8,8 +8,6 @@ project(Pigami
 )
 
 add_executable(pigami
-  src/Framebuffer.cpp
-  src/Framebuffer.hpp
   src/Generator.cpp
   src/Generator.hpp
   src/Resources.cpp
@@ -27,6 +25,8 @@ add_executable(pigami
   src/activity/LevelSelector.hpp
   src/activity/ResourceLoadingScreen.cpp
   src/activity/ResourceLoadingScreen.hpp
+  src/activity/Backbutton.cpp
+  src/activity/Backbutton.hpp
   src/index.html
   src/main.cpp
   src/plateau.cpp
@@ -39,7 +39,7 @@ target_include_directories(pigami PRIVATE src)
 target_link_libraries(pigami smk)
 set_target_properties(pigami PROPERTIES CXX_STANDARD 17)
 
-target_compile_options(pigami PRIVATE -Wall -Wextra -pedantic -Werror)
+target_compile_options(pigami PRIVATE -Wall -Wextra -Werror)
 target_compile_options(pigami PRIVATE -fno-rtti)
 target_compile_options(pigami PRIVATE -fno-exceptions)
 
@@ -56,10 +56,10 @@ if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
 
   # Release flags
   #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --closure 1")
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --js-opts 3")
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --llvm-lto 3")
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --llvm-opts 3")
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -O3")
+  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --js-opts 3")
+  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --llvm-lto 3")
+  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --llvm-opts 3")
+  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -O3")
 
   # Analytics.
   option(ADD_GOOGLE_ANALYTICS "Add google analytics script" ON)

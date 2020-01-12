@@ -7,8 +7,6 @@
 #include <vector>
 #include "Resources.hpp"
 
-bool level_list_loaded = false;
-bool sauvegarde_loaded = false;
 int level_current = -1;
 std::vector<std::string> level_name;
 
@@ -45,6 +43,7 @@ void set_max_level(int n) {
 }
 
 void load() {
+  static bool sauvegarde_loaded = false;
   if (sauvegarde_loaded)
     return;
   sauvegarde_loaded = true;

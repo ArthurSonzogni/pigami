@@ -8,10 +8,11 @@
 #include <memory>
 #include "activity/Activity.hpp"
 #include "plateau.h"
+#include "Backbutton.hpp"
 
 class LevelScreen : public Activity {
  public:
-  LevelScreen(smk::Window& window) : Activity(window) {}
+  LevelScreen(smk::Window& window);
   ~LevelScreen() override = default;
 
   void Step() override;
@@ -24,6 +25,7 @@ class LevelScreen : public Activity {
   std::string level_path;
   std::unique_ptr<Plateau> plateau;
  private:
+  Backbutton back_button_;
   int finger_id;
   glm::vec2 finger_position;
 };

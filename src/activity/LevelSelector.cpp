@@ -10,12 +10,25 @@
 #include <smk/Shape.hpp>
 #include <smk/Sprite.hpp>
 #include <smk/Text.hpp>
+#include <smk/Transformable.hpp>
+#include <smk/VertexArray.hpp>
 #include <smk/Vibrate.hpp>
 #include "Resources.hpp"
 #include "save.hpp"
 
+const auto left_arrow_position = glm::vec2(320 - 2 * 52, 240 + 16);
+const auto right_arrow_position = glm::vec2(320 + 2 * 52, 240 + 16);
+
+LevelSelector::LevelSelector(smk::Window& window, Activity* background_activity)
+    : Activity(window), background_activity_(background_activity) {
+}
+
 void LevelSelector::OnEnter() {
   max_level = save::max_level();
+  if (first_run) {
+    first_run = false;
+    selection_level_selected = max_level + 1;
+  }
   max_level = std::min(max_level, nb_level - 2);
   view_dy_ = 0.f;
 }
@@ -39,23 +52,24 @@ void LevelSelector::Step() {
   float trigger = std::min(window().width(), window().height()) * 0.2f;
   bool must_select_by_touch = false;
   float view_dy_target = 0.f;
-  for(auto& it : window().input().touches()) {
+  for (auto& it : window().input().touches()) {
     auto& touch = it.second;
     auto delta =
         touch.data_points.back().position - touch.data_points.front().position;
-    std::cerr << "delta = " << glm::length(delta) << std::endl;
     if (glm::length(delta) < trigger)
       continue;
-    view_dy_target = delta.y;
+    view_dy_target = std::min(0.f, delta.y);
     delta = glm::normalize(delta);
-    if (std::abs(delta.y) > +0.5f) {
+    if (delta.y < -0.5f) {
       if (!selected_by_touch_)
         smk::Vibrate(20);
       must_select_by_touch = true;
       continue;
     }
-    if (delta.x > +0.5f) selection_level_selected++;
-    if (delta.x < -0.5f) selection_level_selected--;
+    if (delta.x > +0.5f)
+      selection_level_selected++;
+    if (delta.x < -0.5f)
+      selection_level_selected--;
     // 'Consume' the datapoint.
     touch.data_points = {touch.data_points.back()};
   }
@@ -80,14 +94,16 @@ void LevelSelector::Step() {
     for (int i = 0; i < nb_level; ++i) {
       float target = selection_level_selected >= i ? 1.f : 0.f;
       alpha_[i] += (target - alpha_[i]) * 0.1;
-    } alpha_[nb_level] = alpha_[nb_level - 1];
+    }
+    alpha_[nb_level] = alpha_[nb_level - 1];
 
     float left_arrow_alpha_target = selection_level_selected == 0 ? 0.f : 1.f;
     float right_arrow_alpha_target =
         selection_level_selected == max_level + 1 ? 0.f : 1.f;
 
     left_arrow_alpha_ += (left_arrow_alpha_target - left_arrow_alpha_) * 0.05;
-    right_arrow_alpha_ += (right_arrow_alpha_target - right_arrow_alpha_) * 0.05;
+    right_arrow_alpha_ +=
+        (right_arrow_alpha_target - right_arrow_alpha_) * 0.05;
   }
 }
 
@@ -125,28 +141,29 @@ void LevelSelector::Draw() {
   view.SetSize(width, height);
   window().SetView(view);
 
+  float view_alpha = std::max(0.f, 1.f - std::abs(view_dy_ / zoom) / 120.f);
+
   // Display the level number.
-  float number_dx = texture_number.width / 4.f;
   {
-    auto number_sprite = smk::Sprite(texture_number);
-    number_sprite.SetBlendMode(smk::BlendMode::Add);
     int x = (selection_level_selected) % 4;
     int y = (selection_level_selected) / 4;
-    float number_dx = texture_number.width / 4.f;
-    float number_dy = texture_number.height / 3.f;
-    number_sprite.SetTextureRectangle({number_dx * x, number_dy * y,
-                                       number_dx * (x + 1),
-                                       number_dy * (y + 1)});
+    float number_dx = texture_number.width() / 4.f;
+    float number_dy = texture_number.height() / 3.f;
+
+    auto rectangle = smk::Rectangle({number_dx * x, number_dy * y,
+                                     number_dx * (x + 1), number_dy * (y + 1)});
+    auto number_sprite = smk::Sprite(texture_number, rectangle);
+    number_sprite.SetBlendMode(smk::BlendMode::Add);
     number_sprite.SetPosition(320.f - number_dx * 0.5f,
                               240.f - number_dy * 0.5f);
+    number_sprite.SetColor({1.f, 1.f, 1.f, view_alpha});
     window().Draw(number_sprite);
   }
 
   // Helper function. Returns the positions of the circles.
   auto circle_position = [&](int i) {
     float angle = 2.0 * M_PI * (float(i) / nb_level) + M_PI;
-    return glm::vec2(320 + 200 * cos(angle),
-                     240 + 200 * sin(angle));
+    return glm::vec2(320 + 200 * cos(angle), 240 + 200 * sin(angle));
   };
 
   // Lines around circles.
@@ -155,7 +172,7 @@ void LevelSelector::Draw() {
       for (int width : {48}) {
         auto line =
             smk::Shape::Line(circle_position(i - 1), circle_position(i), width);
-        float a = std::max(0.f, alpha_[i] * 2.f - 1.f) * 0.1;
+        float a = std::max(0.f, alpha_[i] * 2.f - 1.f) * 0.1 * view_alpha;
         line.SetColor({1.f, 1.f, 1.f, a});
         line.SetBlendMode(smk::BlendMode::Add);
         window().Draw(line);
@@ -171,9 +188,9 @@ void LevelSelector::Draw() {
     for (int i = 0; i < nb_level; ++i) {
       sprite_level_circle.SetScale(scale, scale);
       sprite_level_circle.SetPosition(circle_position(i));
-      sprite_level_circle.Move(-texture_level_circle.width * 0.5 * scale,
-                               -texture_level_circle.height * 0.5 * scale);
-      float a = std::min(1.f, alpha_[i] * 2.f / 1.f);
+      sprite_level_circle.Move(-texture_level_circle.width() * 0.5 * scale,
+                               -texture_level_circle.height() * 0.5 * scale);
+      float a = std::min(1.f, alpha_[i] * 2.f / 1.f) * view_alpha;
       sprite_level_circle.SetColor({1.f, 1.f, 1.f, a});
       window().Draw(sprite_level_circle);
     }
@@ -182,33 +199,45 @@ void LevelSelector::Draw() {
   // Left arrow.
   {
     auto sprite = smk::Sprite(texture_left_arrow);
+    sprite.SetCenter(24,24);
     sprite.SetBlendMode(smk::BlendMode::Add);
-    sprite.SetPosition(320 - number_dx * 0.5, 240);
-    sprite.SetColor({1.0, 1.0, 1.0, left_arrow_alpha_});
-    sprite.Move(-texture_left_arrow.width, -texture_left_arrow.height * 0.5);
+    sprite.SetPosition(left_arrow_position);
+    sprite.SetColor({1.0, 1.0, 1.0, left_arrow_alpha_ * view_alpha});
     window().Draw(sprite);
   }
 
   // Right arrow.
   {
     auto sprite = smk::Sprite(texture_right_arrow);
+    sprite.SetCenter(24,24);
     sprite.SetBlendMode(smk::BlendMode::Add);
-    sprite.SetPosition(320 + number_dx * 0.5, 240);
-    sprite.SetColor({1.0, 1.0, 1.0, right_arrow_alpha_});
-    sprite.Move(0, -texture_right_arrow.height * 0.5);
+    sprite.SetPosition(right_arrow_position);
+    sprite.SetColor({1.0, 1.0, 1.0, right_arrow_alpha_ * view_alpha});
     window().Draw(sprite);
   }
 
-  // Press enter.
+  // Swipe up for playing.
   {
-    auto sprite = smk::Sprite(texture_press_enter);
-    sprite.SetBlendMode(smk::BlendMode::Add);
-    sprite.SetPosition(
-        320 + width * 0.5 - texture_press_enter.width - margin,
-        240 + height * 0.5 - texture_press_enter.height - margin);
-    float alpha_ = 0.5 + 0.5 * sin(window().time() * 8.f);
-    sprite.SetColor({1.f, 1.f, 1.f, alpha_});
-    sprite.SetBlendMode(smk::BlendMode::Add);
-    window().Draw(sprite);
+    auto triangle = smk::VertexArray({
+        {{0.f, 0.f}, {0.f, 0.f}},
+        {{1.f, 1.f}, {0.f, 0.f}},
+        {{0.f, 0.5f}, {0.f, 0.f}},
+        {{0.f, 0.f}, {0.f, 0.f}},
+        {{0.f, 0.5f}, {0.f, 0.f}},
+        {{-1.f, 1.f}, {0.f, 0.f}},
+    });
+    auto arrow = smk::Transformable();
+    arrow.SetVertexArray(std::move(triangle));
+    arrow.SetPosition(320, 240 + height * 0.5 - margin);
+    arrow.SetScale(25.f, +25.f);
+
+    for (int y = 0; y < 6; ++y) {
+      arrow.Move({0.f, -20});
+      float alpha = view_alpha *
+                    (-0.2 + 1.2 * sin(-y * 0.8 + window().time() * 8.f)) *
+                    (1.f - y / 6.f);
+      arrow.SetColor({1.f, 1.f, 1.f, alpha});
+      window().Draw(arrow);
+    }
   }
 }

@@ -7,6 +7,7 @@
 #include <fstream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <smk/Color.hpp>
 #include <smk/Shape.hpp>
 #include <smk/Text.hpp>
 #include <smk/View.hpp>
@@ -69,11 +70,6 @@ glm::mat4 ShadowMatrix(glm::vec4 groundplane, glm::vec4 lightpos) {
 }
 
 }  // namespace
-
-void Plateau::InitGl() {
-  glEnable(GL_CULL_FACE);
-  glEnable(GL_DEPTH_TEST);
-}
 
 Plateau::Plateau()
     : nb_move(0),
@@ -310,10 +306,10 @@ void Plateau::Step() {
   }
 }
 
-void Plateau::Draw(smk::Window* window,
+void Plateau::Draw(smk::RenderTarget* window,
                    float screen_width,
                    float screen_height) {
-  screen_ = window;
+  window_ = window;
   glm::mat4 projection =
       glm::perspective(70.f, float(screen_width / screen_height), 5.f, 30.f);
 
@@ -321,27 +317,26 @@ void Plateau::Draw(smk::Window* window,
   glm::vec3 up_direction = {0.f, 0.f, 1.f};
   auto view = glm::lookAt(eye, camera_position, up_direction);
 
-  screen_->SetShaderProgram(screen_->shader_program_3d());
-  glClear(GL_STENCIL_BUFFER_BIT);
-
+  window->Clear(smk::Color::Black);
+  window_->SetShaderProgram(window_->shader_program_3d());
   glEnable(GL_CULL_FACE);
   glDisable(GL_STENCIL_TEST);
   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
   glStencilFunc(GL_ALWAYS, 0, 0xffffffff);
   glFrontFace(GL_CCW);
 
-  screen_->SetView(projection);
+  window_->SetView(projection);
   glm::mat4 view_untranslated = glm::scale(view, glm::vec3(20.f));
   for (int i = 0; i < 3; ++i)
     view_untranslated[3][i] = 0.f;
   DrawSkybox(view_untranslated);
 
   glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  screen_->shader_program_3d()->SetUniform("light_position",
+  window_->shader_program_3d()->SetUniform("light_position",
                                            view * light_position);
-  screen_->shader_program_3d()->SetUniform("ambient", 0.4f);
-  screen_->shader_program_3d()->SetUniform("diffuse", 0.4f);
-  screen_->shader_program_3d()->SetUniform("specular", 0.2f);
+  window_->shader_program_3d()->SetUniform("ambient", 0.4f);
+  window_->shader_program_3d()->SetUniform("diffuse", 0.4f);
+  window_->shader_program_3d()->SetUniform("specular", 0.2f);
 
   static float finish_animation_transformed = 0;
   finish_animation_transformed++;
@@ -349,13 +344,6 @@ void Plateau::Draw(smk::Window* window,
   int x, y;
   // On écrit dans le stencil buffer pour l'ombre du block
   glEnable(GL_DEPTH_TEST);
-  // glDisable(GL_STENCIL_TEST);
-  // glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-  // glStencilFunc(GL_ALWAYS, 1, 0xffffffff);
-
-  // if (block.animation == win && block.time > 20) {
-  // glTranslatef(0.0, 0.0, -(block.time - 19) * (block.time - 19) * 0.001);
-  //}
 
   for (y = 0; y < height; ++y) {
     for (x = 0; x < width; ++x) {
@@ -388,11 +376,11 @@ void Plateau::Draw(smk::Window* window,
 
   glm::mat4 shadow_mat = ShadowMatrix(floorPlane, light_position);
   // Shadow
-  block.Draw(screen_, view, false, true);
+  block.Draw(window_, view, false, true);
   // Reflet
-  block.Draw(screen_, view * shadow_mat, true, false);
+  block.Draw(window_, view * shadow_mat, true, false);
   // Normal
-  block.Draw(screen_, view, false, false);
+  block.Draw(window_, view, false, false);
 
   for (int d = 0; d < 2; ++d) {
     for (int y = 0; y < height; ++y) {
@@ -414,23 +402,23 @@ void Plateau::Draw(smk::Window* window,
 
 
   if (show_nb_move) {
-    float reduced = std::min(screen_->width(), screen_->height());
-    float reduced_x = screen_->width() / reduced;
-    float reduced_y = screen_->height() / reduced;
+    float reduced = std::min(window_->width(), window_->height());
+    float reduced_x = window_->width() / reduced;
+    float reduced_y = window_->height() / reduced;
 
     auto view = smk::View();
     view.SetCenter(reduced_x * 0.5f, reduced_y * 0.5f);
     view.SetSize(reduced_x, reduced_y);
-    screen_->SetView(view);
+    window_->SetView(view);
 
-    screen_->SetShaderProgram(screen_->shader_program_2d());
+    window_->SetShaderProgram(window_->shader_program_2d());
     glClear(GL_STENCIL_BUFFER_BIT);
     auto text = smk::Text(font_arial, std::to_string(nb_move) + "/" +
                                           std::to_string(nb_move_min));
     static float scale = reduced_x * 0.001f;
     text.SetScale(scale, scale);
     text.SetPosition(scale * 25.f, scale * 25.f);
-    screen_->Draw(text);
+    window_->Draw(text);
   }
 }
 
@@ -497,7 +485,7 @@ void Plateau::DrawGround(glm::mat4 view) {
     auto plane = smk::Shape::Plane();
     plane.SetTransformation(glm::translate(view, {+0.5, +0.5, +0.f}));
     plane.SetTexture(texture_dalle);
-    screen_->Draw(plane);
+    window_->Draw(plane);
   }
 
   {
@@ -509,7 +497,7 @@ void Plateau::DrawGround(glm::mat4 view) {
     view = glm::translate(view, {+0.5, +0.5, +0.5f});
     cube.SetTransformation(view);
     cube.SetTexture(texture_dalle);
-    screen_->Draw(cube);
+    window_->Draw(cube);
   }
 }
 
@@ -531,7 +519,7 @@ void Plateau::DrawFragile(glm::mat4 view, Fragile fragile) {
     auto plane = smk::Shape::Plane();
     plane.SetTransformation(glm::translate(view, {+0.5, +0.5, +0.f}));
     plane.SetTexture(*textures[fragile.maxWeight - 1]);
-    screen_->Draw(plane);
+    window_->Draw(plane);
   }
 
   {
@@ -543,7 +531,7 @@ void Plateau::DrawFragile(glm::mat4 view, Fragile fragile) {
     view = glm::translate(view, {+0.5, +0.5, +0.5f});
     cube.SetTransformation(view);
     cube.SetTexture(*textures[fragile.maxWeight - 1]);
-    screen_->Draw(cube);
+    window_->Draw(cube);
   }
 }
 
@@ -566,7 +554,7 @@ void Plateau::DrawButton(glm::mat4 view, int minWeight) {
       &texture_bouton3,
   };
   cylinder.SetTexture(*textures[minWeight - 1]);
-  screen_->Draw(cylinder);
+  window_->Draw(cylinder);
 }
 
 void Plateau::DrawFinish(glm::mat4 view, int depth) {
@@ -582,7 +570,7 @@ void Plateau::DrawFinish(glm::mat4 view, int depth) {
     v = glm::translate(v, {+0.5, +0.5, +0.5f});
     cube.SetTransformation(v);
     cube.SetColor({0.8, 0.7, 0.3, 1.f});
-    screen_->Draw(cube);
+    window_->Draw(cube);
   }
 
   if (depth == 1) {
@@ -596,7 +584,7 @@ void Plateau::DrawFinish(glm::mat4 view, int depth) {
     shape.SetColor({0.8, 0.7, 0.3, 1.f});
     shape.SetTransformation(v);
     shape.SetBlendMode(smk::BlendMode::Add);
-    screen_->Draw(shape);
+    window_->Draw(shape);
   }
 }
 
@@ -646,7 +634,7 @@ void Plateau::DrawRetractable(Retractable& r, glm::mat4 view) {
   auto cube = smk::Shape::Cube();
   cube.SetTransformation(view);
   cube.SetTexture(texture_retractable);
-  screen_->Draw(cube);
+  window_->Draw(cube);
 }
 
 void Plateau::ActiveExtScreen(int max_move) {
@@ -654,7 +642,7 @@ void Plateau::ActiveExtScreen(int max_move) {
   show_nb_move = true;
 }
 
-void Block::Draw(smk::Window* window,
+void Block::Draw(smk::RenderTarget* window,
                  glm::mat4 view,
                  bool shadow,
                  bool reflet) {
@@ -984,11 +972,11 @@ void Plateau::copie(Plateau& p) {
 }
 
 void Plateau::DrawSkybox(glm::mat4 view) {
-  screen_->shader_program_3d()->SetUniform("light_position",
+  window_->shader_program_3d()->SetUniform("light_position",
                                            {0.f, 0.f, 0.f, 1.f});
-  screen_->shader_program_3d()->SetUniform("ambient", 1.f);
-  screen_->shader_program_3d()->SetUniform("diffuse", 0.f);
-  screen_->shader_program_3d()->SetUniform("specular", 0.f);
+  window_->shader_program_3d()->SetUniform("ambient", 1.f);
+  window_->shader_program_3d()->SetUniform("diffuse", 0.f);
+  window_->shader_program_3d()->SetUniform("specular", 0.f);
   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
   glStencilFunc(GL_ALWAYS, 42, 0xffffffff);
 
@@ -998,21 +986,21 @@ void Plateau::DrawSkybox(glm::mat4 view) {
     auto v = glm::rotate(view, float(M_PI), {0.f, 0.f, 1.f});
     face.SetTransformation(glm::translate(v, {0.f, 0.f, 0.5f}));
     face.SetTexture(texture_skybox_top);
-    screen_->Draw(face);
+    window_->Draw(face);
   }
 
   {
     auto v = glm::rotate(view, float(M_PI), {1.f, 0.f, 0.f});
     face.SetTransformation(glm::translate(v, {0.f, 0.f, +0.5f}));
     face.SetTexture(texture_skybox_bottom);
-    screen_->Draw(face);
+    window_->Draw(face);
   }
 
   {
     auto v = glm::rotate(view, float(M_PI * 0.5f), {-1.f, 0.f, 0.f});
     face.SetTransformation(glm::translate(v, {0.f, 0.f, 0.5f}));
     face.SetTexture(texture_skybox_front);
-    screen_->Draw(face);
+    window_->Draw(face);
   }
 
   {
@@ -1020,7 +1008,7 @@ void Plateau::DrawSkybox(glm::mat4 view) {
     v = glm::rotate(v, float(M_PI * 0.5f), {-1.f, 0.f, 0.f});
     face.SetTransformation(glm::translate(v, {0.f, 0.f, 0.5f}));
     face.SetTexture(texture_skybox_left);
-    screen_->Draw(face);
+    window_->Draw(face);
   }
 
   {
@@ -1028,7 +1016,7 @@ void Plateau::DrawSkybox(glm::mat4 view) {
     v = glm::rotate(v, float(M_PI * 0.5f), {-1.f, 0.f, 0.f});
     face.SetTransformation(glm::translate(v, {0.f, 0.f, 0.5f}));
     face.SetTexture(texture_skybox_back);
-    screen_->Draw(face);
+    window_->Draw(face);
   }
 
   {
@@ -1036,7 +1024,7 @@ void Plateau::DrawSkybox(glm::mat4 view) {
     v = glm::rotate(v, float(M_PI * 0.5f), {-1.f, 0.f, 0.f});
     face.SetTransformation(glm::translate(v, {0.f, 0.f, 0.5f}));
     face.SetTexture(texture_skybox_right);
-    screen_->Draw(face);
+    window_->Draw(face);
   }
 }
 

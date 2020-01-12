@@ -188,7 +188,7 @@ int sound_index = 0;
 void PlaySound(const smk::SoundBuffer& snd) {
   sounds.resize(10);
   sound_index = (sound_index + 1) % sounds.size();
-  sounds[sound_index].SetBuffer(snd);
+  sounds[sound_index] = smk::Sound(snd);
   sounds[sound_index].Play();
 }
 

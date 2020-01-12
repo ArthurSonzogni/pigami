@@ -9,9 +9,19 @@
 #include <smk/Shape.hpp>
 #include <smk/Sprite.hpp>
 #include <smk/Text.hpp>
-#include "Framebuffer.hpp"
+#include <smk/Vibrate.hpp>
 #include "Generator.hpp"
 #include "Resources.hpp"
+
+const float tile_space = 0.6f;
+
+GeneratorScreen::GeneratorScreen(smk::Window& window,
+                                 Activity* background_activity)
+    : Activity(window),
+      back_button_(window),
+      background_activity_(background_activity) {
+  back_button_.on_quit = [&] { on_quit(); };
+}
 
 GeneratorScreen::Entry GeneratorScreen::BuildEntry(std::string level,
                                                    int score) {
@@ -20,34 +30,16 @@ GeneratorScreen::Entry GeneratorScreen::BuildEntry(std::string level,
   int min_movement = Evaluation(*plateau);
 
   float dim = 0.5 * std::max(window().width(), window().height());
-  auto framebuffer = Framebuffer(dim, dim);
-  framebuffer.Bind();
-  //glm::mat4 projection = glm::perspective(70.f, 1.f, 1.f, 40.f);
-  //glm::vec3 camera_target = glm::vec3(plateau->block.x, plateau->block.y, 0.f) -
-                            //0.5f * glm::vec3(-2.f, -5.f, 0.f);
-  //glm::vec3 up_direction = {0.f, 0.f, 1.f};
-  //glm::vec3 eye = camera_target + 2.f * glm::vec3(-2.f, -5.f, 5.f);
-  //glm::mat4 view = glm::lookAt(eye, camera_target, up_direction);
-  //window().SetView(view);
-
-  window().SetShaderProgram(window().shader_program_3d());
-
-  glClearColor(0.5f, 1.f, 1.f, 1.f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glFrontFace(GL_CCW);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_DEPTH_TEST);
-  glViewport(0, 0, dim, dim);
+  auto framebuffer = smk::Framebuffer(dim, dim);
+  plateau->Draw(&framebuffer, dim, dim);
   plateau->Draw(&window(), dim, dim);
-  framebuffer.GenerateMipmap();
-  framebuffer.Unbind();
 
   return {
       level,
       std::move(plateau),
       score,
       min_movement,
-      std::move(framebuffer.color_texture),
+      std::move(framebuffer),
   };
 }
 
@@ -58,9 +50,14 @@ void GeneratorScreen::OnEnter() {
   entries.clear();
   while (std::getline(file, level) && std::getline(file, score))
     entries.push_back(BuildEntry(level, std::stoi(score)));
-  entries.push_back({"Generate", nullptr, 0, 0, smk::Texture()});
+  entries.push_back({"Generate", nullptr, 0, 0, smk::Framebuffer(100, 100)});
   generate_dy_ = -10.f;
-  glViewport(-1, -1, window().width(), window().height());
+
+  touch_dx_ = 0.f;
+  touch_dxx_ = 0.f;
+  touched_ = false;
+  selected_index_x = selected_index;
+  selected_index_dx = 0.f;
 }
 
 void GeneratorScreen::Animate() {
@@ -73,21 +70,70 @@ void GeneratorScreen::Animate() {
 }
 
 void GeneratorScreen::Step() {
+  int selected_index_previous = selected_index;
+  float width = window().width();
+  float height = window().height();
+  float zoom = std::min(width, height);
+  bool select_by_touch = false;
+
+  if (window().input().IsKeyPressed(GLFW_KEY_LEFT))
+    selected_index--;
+  if (window().input().IsKeyPressed(GLFW_KEY_RIGHT))
+    selected_index++;
+  if (window().input().IsKeyPressed(GLFW_KEY_ESCAPE))
+    on_quit();
+
+  if (window().input().touches().size()) {
+    touched_ = true;
+    for (auto& it : window().input().touches()) {
+      auto& touch = it.second;
+      auto delta = touch.data_points.back().position -
+                   touch.data_points.front().position;
+      touch_dxx_ += ((delta.x - touch_dx_) - touch_dxx_) * 0.5f;
+      touch_dx_ = delta.x;
+      touch_position = touch.data_points.front().position;
+    }
+  } else {
+    if (touched_) {
+      touched_ = false;
+      float trigger = std::min(window().width(), window().height()) * 0.01f;
+      if (std::abs(touch_dx_) < trigger && std::abs(selected_index_dx) < 0.01f) {
+        bool in_strip = std::abs((touch_position.y - window().height() * 0.5) /
+                                 (zoom * tile_space)) < 0.5f;
+        int new_selected_index = std::round(
+            selected_index_x +
+            (touch_position.x - window().width() * 0.5) / (zoom * tile_space));
+        int new_selected_index_clamped = new_selected_index;
+        new_selected_index_clamped = std::max(new_selected_index_clamped, 0);
+        new_selected_index_clamped =
+            std::min(new_selected_index_clamped, (int)entries.size() - 1);
+
+        if (new_selected_index_clamped == new_selected_index && in_strip) {
+          smk::Vibrate(20);
+          selected_index = new_selected_index_clamped;
+          select_by_touch = true;
+        }
+      } else if (!select_by_touch) {
+        selected_index_dx -= touch_dxx_ / (zoom * tile_space);
+        selected_index_x -= touch_dx_ / (zoom * tile_space);
+        selected_index = std::round(selected_index_x -
+                                    50.f * touch_dxx_ / (zoom * tile_space));
+      }
+      touch_dx_ = 0.f;
+      touch_dxx_ = 0.f;
+    }
+  }
+
   if (window().input().IsKeyReleased(GLFW_KEY_ENTER) ||
-      window().input().IsKeyReleased(GLFW_KEY_SPACE)) {
+      window().input().IsKeyReleased(GLFW_KEY_SPACE) || select_by_touch) {
     PlaySound(sound_menu_select);
     if (selected_index == (int)entries.size() - 1)
       on_generate();
     else
       on_selected();
   }
-  int selected_index_previous = selected_index;
 
-  // clang-format off
-  if (window().input().IsKeyPressed(GLFW_KEY_LEFT)) selected_index--;
-  if (window().input().IsKeyPressed(GLFW_KEY_RIGHT)) selected_index++;
-  if (window().input().IsKeyPressed(GLFW_KEY_ESCAPE)) on_quit();
-  // clang-format on
+  back_button_.Step();
 
   Animate();
 
@@ -124,16 +170,18 @@ void GeneratorScreen::Draw() {
   window().Draw(square);
 
   auto draw_level = [&](int level) {
-    float dx = (level - selected_index_x) * 0.6;
+    float dx = (level - selected_index_x) * tile_space;
     float dy = (level == (int)entries.size() - 1) ? generate_dy_ : 0.f;
+
+    dx += touch_dx_ / zoom;
 
     // Tile with texture.
     {
-      auto& texture = entries[level].texture;
-      auto sprite = smk::Sprite(texture);
-      // sprite.SetColor(entries[level].color);
-      sprite.SetPosition(dx - 0.25, -0.2 + 0.5 + dy);
-      sprite.SetScale(0.5 / texture.width, -0.5 / texture.height);
+      auto& framebuffer = entries[level].framebuffer;
+      auto sprite = smk::Sprite(framebuffer);
+      sprite.SetPosition(dx - 0.25, -0.2 + dy);
+      sprite.SetScale(0.5 / framebuffer.color_texture.width(),
+                      0.5 / framebuffer.color_texture.height());
       window().Draw(sprite);
     }
 
@@ -171,6 +219,8 @@ void GeneratorScreen::Draw() {
 
   for (int level = 0; level < (int)entries.size(); ++level)
     draw_level(level);
+
+  back_button_.Draw();
 }
 
 void GeneratorScreen::Save(int nb_move) {

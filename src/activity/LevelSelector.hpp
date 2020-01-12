@@ -9,8 +9,7 @@
 
 class LevelSelector : public Activity {
  public:
-  LevelSelector(smk::Window& window, Activity* background_activity)
-      : Activity(window), background_activity_(background_activity) {}
+  LevelSelector(smk::Window& window, Activity* background_activity);
   ~LevelSelector() override = default;
 
   std::function<void()> on_selected = [] {};
@@ -24,6 +23,7 @@ class LevelSelector : public Activity {
  private:
   Activity* background_activity_;
   const int nb_level = 12;
+  bool first_run = true;
   int max_level;
   std::vector<float> alpha_ = std::vector<float>(nb_level + 1, 0.f);
   float left_arrow_alpha_ = 0.f;

@@ -169,7 +169,6 @@ int main() {
       FS.mkdir("/sav");
       FS.mount(IDBFS, {}, "/sav");
       FS.syncfs(true, function(err){console.log("IndexDB synced", err)});
-      FS.mkdir("/sav/generated_level");
   , 0);
   // clang-format on
 #else

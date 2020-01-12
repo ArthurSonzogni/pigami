@@ -15,6 +15,11 @@
 #include "Resources.hpp"
 #include "plateau.h"
 
+LevelScreen::LevelScreen(smk::Window& window)
+    : Activity(window), back_button_(window) {
+  back_button_.on_quit = [&] { on_quit(); };
+}
+
 void LevelScreen::OnEnter() {
   plateau = std::make_unique<Plateau>();
   plateau->Load(ResourcePath() + "/level/level_intro");
@@ -37,26 +42,37 @@ void LevelScreen::Step() {
     on_quit();
   }
 
-  float trigger = std::min(window().width(), window().height()) * 0.2f;
+  float trigger = std::min(window().width(), window().height()) * 0.12f;
   for (auto& it : window().input().touches()) {
     auto& touch = it.second;
     auto delta =
         touch.data_points.back().position - touch.data_points.front().position;
-    std::cerr << "delta = " << glm::length(delta) << std::endl;
     if (glm::length(delta) < trigger)
       continue;
-    smk::Vibrate(20);
     touch.data_points = {touch.data_points.back()};
 
+    if (plateau->block.animation != wait)
+      continue;
+
+    smk::Vibrate(20);
+
     delta = glm::normalize(delta);
-    if (delta.x > +0.5f)
+    if (delta.x > +0.5f) {
       plateau->block.Move(right);
-    if (delta.x < -0.5f)
+      continue;
+    }
+    if (delta.x < -0.5f) {
       plateau->block.Move(left);
-    if (delta.y > +0.5f)
+      continue;
+    }
+    if (delta.y > 0.f) {
       plateau->block.Move(down);
-    if (delta.y < -0.5f)
+      continue;
+    }
+    if (delta.y < 0.f) {
       plateau->block.Move(up);
+      continue;
+    }
   }
 
   if (plateau->IsLevelWinned())
@@ -66,9 +82,11 @@ void LevelScreen::Step() {
     on_lose();
 
   plateau->Step();
+  back_button_.Step();
 }
 
 void LevelScreen::Draw() {
   window().Clear(smk::Color::Black);
   plateau->Draw(&window(), window().width(), window().height());
+  back_button_.Draw();
 }

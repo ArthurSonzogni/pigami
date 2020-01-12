@@ -21,17 +21,22 @@ void ResourceLoadingScreen::Draw() {
   ResourceInitializer::Resource resource = initializer.resources.front();
   initializer.resources.pop_front();
 
+  float width = window().width();
+  float height = window().height();
+  float zoom = std::min(width / 640.f, height / 480.f);
+  width /= zoom;
+  height /= zoom;
   smk::View view;
-  view.SetCenter(320, 240);
-  view.SetSize(640, 480);
+  view.SetCenter(320.f, 240.f);
+  view.SetSize(width, height);
   window().SetView(view);
 
   smk::Text text;
   text.SetFont(font_arial);
   text.SetString("Decoding: " + *resource.path);
   text.SetColor(smk::Color::White);
-  text.SetPosition({10.f, 480.f - 60.f});
-  text.SetScale(0.33,0.33);
+  text.SetPosition({10.f, 240.f + height * 0.5 - 60.f});
+  text.SetScale(0.33 * zoom ,0.33 * zoom);
   window().Draw(text);
 
   resource.Load();
