@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
     <link rel="shortcut icon" type="image/png" sizes="64x64" href=“./favicon.png">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
   </head>
   <body>
 
@@ -34,9 +35,8 @@
       }, false);
 
       function onResize() {
-        var positionInfo = canvas.getBoundingClientRect();
-        canvas.width = positionInfo.width;
-        canvas.height = positionInfo.height;
+        canvas.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        canvas.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
       }
       window.addEventListener("resize", onResize, true);
 
