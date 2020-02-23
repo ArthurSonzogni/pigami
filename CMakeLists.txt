@@ -95,5 +95,5 @@ else()
   target_link_libraries(pigami stdc++fs)
 endif()
 
-install(TARGETS pigami RUNTIME DESTINATION "bin")
+install(TARGETS pigami RUNTIME DESTINATION bin)
 install(DIRECTORY resources DESTINATION share/pigami)

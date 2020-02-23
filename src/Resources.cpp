@@ -30,16 +30,18 @@ std::string ResourcePath() {
 
   std::vector<std::string> path_list = {
       // Application installed using snapcraft.
+      SNAP + "/usr/share/pigami/resources",
       SNAP + "/usr/local/share/pigami/resources",
 
       // Application installed using "sudo make install"
+      "/usr/share/pigami/resources",
       "/usr/local/share/pigami/resources",
 
       // Code build and run inside ${CMAKE_CURRENT_DIRECTORY}/build
       "../resources",
 
       // Code build and run inside ${CMAKE_CURRENT_DIRECTORY}
-      "../resources",
+      "./resources",
   };
 
   for (auto& path : path_list) {
