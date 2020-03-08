@@ -6,7 +6,7 @@ description: |
   Buttons, Traps and other objects are there to make the game more challenging.
   For the more experienced, the game has a level generator. The algorithm used will put your intelligence to the test.
 
-icon: "../resources/favicon.png"
+icon: "./resources/favicon.png"
 grade: stable
 confinement: strict
 base: core18
