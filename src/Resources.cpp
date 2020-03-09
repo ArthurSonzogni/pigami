@@ -30,7 +30,7 @@ std::string ResourcePath() {
 
   std::vector<std::string> path_list = {
       // Application installed using snapcraft.
-      SNAP + "/share/icemaze/resources",
+      SNAP + "/share/pigami/resources",
 
       // Application installed using "sudo make install"
       "/usr/share/pigami/resources",
