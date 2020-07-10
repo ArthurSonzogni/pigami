@@ -132,6 +132,10 @@ class Main {
     }
   }
 
+  void Run() {
+    window_.ExecuteMainLoop([&] { Loop(); });
+  }
+
  private:
   Activity* activity_;
   smk::Window window_;
@@ -148,16 +152,6 @@ class Main {
   int frame;
   float start_time;
 };
-
-void MainLoop() {
-  static std::unique_ptr<Main> main;
-
-  if (!main)
-    main = std::make_unique<Main>();
-
-  if (main)
-    main->Loop();
-}
 
 int main() {
   smk::Audio audio;
@@ -176,11 +170,8 @@ int main() {
   std::experimental::filesystem::create_directory(SavePath() + "/generated_level");
 #endif
 
-#ifdef __EMSCRIPTEN__
-  emscripten_set_main_loop(&MainLoop, 0, 1);
-#else
-  while (1)
-    MainLoop();
-#endif
+  auto main = std::make_unique<Main>();
+  main->Run();
+
   return EXIT_SUCCESS;
 }
