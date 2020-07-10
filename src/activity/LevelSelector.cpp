@@ -3,16 +3,19 @@
 // the LICENSE file.
 
 #include "activity/LevelSelector.hpp"
+
 #include <cmath>
 #include <iostream>
 #include <smk/BlendMode.hpp>
 #include <smk/Color.hpp>
+#include <smk/Input.hpp>
 #include <smk/Shape.hpp>
 #include <smk/Sprite.hpp>
 #include <smk/Text.hpp>
 #include <smk/Transformable.hpp>
 #include <smk/VertexArray.hpp>
 #include <smk/Vibrate.hpp>
+
 #include "Resources.hpp"
 #include "save.hpp"
 

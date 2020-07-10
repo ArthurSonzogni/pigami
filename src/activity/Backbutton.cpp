@@ -3,10 +3,13 @@
 // the LICENSE file.
 
 #include "activity/Backbutton.hpp"
+
 #include <cmath>
 #include <smk/Color.hpp>
+#include <smk/Input.hpp>
 #include <smk/Shape.hpp>
 #include <smk/Text.hpp>
+
 #include "Resources.hpp"
 
 void Backbutton::Step() {

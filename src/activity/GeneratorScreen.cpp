@@ -3,13 +3,16 @@
 // the LICENSE file.
 
 #include "activity/GeneratorScreen.hpp"
+
 #include <cmath>
 #include <fstream>
 #include <smk/Color.hpp>
+#include <smk/Input.hpp>
 #include <smk/Shape.hpp>
 #include <smk/Sprite.hpp>
 #include <smk/Text.hpp>
 #include <smk/Vibrate.hpp>
+
 #include "Generator.hpp"
 #include "Resources.hpp"
 
