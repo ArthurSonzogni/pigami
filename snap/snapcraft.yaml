@@ -1,5 +1,5 @@
 name: pigami
-version: '1.0'
+adopt-info: pigami
 summary: A rolling block adventure.
 description: |
   The principle, roll your cube (rather rectangular) to reach the finish without falling!
@@ -53,6 +53,7 @@ parts:
         $SNAPCRAFT_PART_SRC
       make -j ${SNAPCRAFT_PARALLEL_BUILD_COUNT}
       make install
+      snapcraftctl set-version "$(git rev-list --count HEAD)"
 
 passthrough:
   title: pigami
