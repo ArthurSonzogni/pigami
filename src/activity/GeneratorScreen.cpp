@@ -183,8 +183,8 @@ void GeneratorScreen::Draw() {
       auto& framebuffer = entries[level].framebuffer;
       auto sprite = smk::Sprite(framebuffer);
       sprite.SetPosition(dx - 0.25, -0.2 + dy);
-      sprite.SetScale(0.5 / framebuffer.color_texture.width(),
-                      0.5 / framebuffer.color_texture.height());
+      sprite.SetScale(0.5 / framebuffer.color_texture().width(),
+                      0.5 / framebuffer.color_texture().height());
       window().Draw(sprite);
     }
 
