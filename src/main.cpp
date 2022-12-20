@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <iostream>
 #include <locale>
 #include <smk/Audio.hpp>
@@ -154,7 +154,7 @@ class Main {
 };
 
 int main() {
-  smk::Audio audio;
+  static smk::Audio audio;
   std::locale::global(std::locale("C.UTF-8"));
 
 #ifdef __EMSCRIPTEN__
@@ -166,12 +166,12 @@ int main() {
   , 0);
   // clang-format on
 #else
-  std::experimental::filesystem::create_directory(SavePath());
-  std::experimental::filesystem::create_directory(SavePath() + "/generated_level");
+  std::filesystem::create_directory(SavePath());
+  std::filesystem::create_directory(SavePath() + "/generated_level");
 #endif
 
-  auto main = std::make_unique<Main>();
-  main->Run();
+  static Main main;
+  main.Run();
 
   return EXIT_SUCCESS;
 }

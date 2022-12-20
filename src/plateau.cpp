@@ -332,21 +332,17 @@ void Plateau::Draw(smk::RenderTarget* window,
   DrawSkybox(view_untranslated);
 
   glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  window_->shader_program_3d()->SetUniform("light_position",
+  window_->shader_program_3d().SetUniform("light_position",
                                            view * light_position);
-  window_->shader_program_3d()->SetUniform("ambient", 0.4f);
-  window_->shader_program_3d()->SetUniform("diffuse", 0.4f);
-  window_->shader_program_3d()->SetUniform("specular", 0.2f);
+  window_->shader_program_3d().SetUniform("ambient", 0.4f);
+  window_->shader_program_3d().SetUniform("diffuse", 0.4f);
+  window_->shader_program_3d().SetUniform("specular", 0.2f);
 
-  static float finish_animation_transformed = 0;
-  finish_animation_transformed++;
-
-  int x, y;
   // On écrit dans le stencil buffer pour l'ombre du block
   glEnable(GL_DEPTH_TEST);
 
-  for (y = 0; y < height; ++y) {
-    for (x = 0; x < width; ++x) {
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
       switch (elements[x][y].type) {
         case Type::GROUND:
           DrawGround(glm::translate(view, {x, y, 0.f}));
@@ -972,11 +968,11 @@ void Plateau::copie(Plateau& p) {
 }
 
 void Plateau::DrawSkybox(glm::mat4 view) {
-  window_->shader_program_3d()->SetUniform("light_position",
+  window_->shader_program_3d().SetUniform("light_position",
                                            {0.f, 0.f, 0.f, 1.f});
-  window_->shader_program_3d()->SetUniform("ambient", 1.f);
-  window_->shader_program_3d()->SetUniform("diffuse", 0.f);
-  window_->shader_program_3d()->SetUniform("specular", 0.f);
+  window_->shader_program_3d().SetUniform("ambient", 1.f);
+  window_->shader_program_3d().SetUniform("diffuse", 0.f);
+  window_->shader_program_3d().SetUniform("specular", 0.f);
   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
   glStencilFunc(GL_ALWAYS, 42, 0xffffffff);
 

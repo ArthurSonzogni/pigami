@@ -98,7 +98,6 @@ smk::Texture texture_left_arrow;
 smk::Texture texture_level_background;
 smk::Texture texture_level_circle;
 smk::Texture texture_number;
-smk::Texture texture_press_enter;
 smk::Texture texture_retractable;
 smk::Texture texture_right_arrow;
 smk::Texture texture_skybox_back;
@@ -141,7 +140,6 @@ std::map<smk::Texture*, std::string> image_resources{
     {&texture_level_background, "/img/level_background.png"},
     {&texture_level_circle, "/img/level_circle.png"},
     {&texture_number, "/img/number.png"},
-    {&texture_press_enter, "/img/press_enter.png"},
     {&texture_retractable, "/img/retractable.png"},
     {&texture_right_arrow, "/img/right_arrow.png"},
     {&texture_skybox_back, "/img/skybox_back.png"},

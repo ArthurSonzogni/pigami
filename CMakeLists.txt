@@ -49,17 +49,8 @@ if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
 
   set(CXX_FLAGS "CXX FLAGS EMCC_DEBUG=1 -g")
 
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -s DEMANGLE_SUPPORT=1")
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -s DISABLE_EXCEPTION_CATCHING=2")
-  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -s WASM=1")
   set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -s TOTAL_MEMORY=134217728")
-
-  # Release flags
-  #set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --closure 1")
-  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --js-opts 3")
-  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --llvm-lto 3")
-  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " --llvm-opts 3")
-  set_property(TARGET pigami APPEND_STRING PROPERTY LINK_FLAGS  " -O3")
+  #set_property(TARGET inthecube APPEND_STRING PROPERTY LINK_FLAGS " -sDEMANGLE_SUPPORT")
 
   # Analytics.
   option(ADD_GOOGLE_ANALYTICS "Add google analytics script" ON)
@@ -82,6 +73,12 @@ if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/favicon.png
     ${CMAKE_CURRENT_BINARY_DIR}/favicon.png
+    COPYONLY
+  )
+
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/run_webassembly.py
+    ${CMAKE_CURRENT_BINARY_DIR}/run_webassembly.py
     COPYONLY
   )
 

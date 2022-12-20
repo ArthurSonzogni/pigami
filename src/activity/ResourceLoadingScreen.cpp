@@ -31,13 +31,16 @@ void ResourceLoadingScreen::Draw() {
   view.SetSize(width, height);
   window().SetView(view);
 
-  smk::Text text;
-  text.SetFont(font_arial);
-  text.SetString("Decoding: " + *resource.path);
-  text.SetColor(smk::Color::White);
-  text.SetPosition({10.f, 240.f + height * 0.5 - 60.f});
-  text.SetScale(0.33 * zoom ,0.33 * zoom);
-  window().Draw(text);
+  static int i = 0;
+  if (i++) {
+    smk::Text text;
+    text.SetFont(font_arial);
+    text.SetString(": " + *resource.path);
+    text.SetColor(smk::Color::White);
+    text.SetPosition({10.f, 240.f + height * 0.5 - 60.f});
+    text.SetScale(0.33 * zoom ,0.33 * zoom);
+    window().Draw(text);
+  }
 
   resource.Load();
 }

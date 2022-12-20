@@ -36,7 +36,6 @@ extern smk::Texture texture_level_background;
 extern smk::Texture texture_level_circle;
 extern smk::Texture texture_number_little;
 extern smk::Texture texture_number;
-extern smk::Texture texture_press_enter;
 extern smk::Texture texture_retractable;
 extern smk::Texture texture_right_arrow;
 extern smk::Texture texture_skybox_back;
