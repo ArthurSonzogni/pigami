@@ -31,6 +31,8 @@ std::string ResourcePath() {
   std::vector<std::string> path_list = {
       // Application installed using snapcraft.
       SNAP + "/share/pigami/resources",
+      SNAP + "/usr/share/pigami/resources",
+      SNAP + "/usr/local/share/pigami/resources",
 
       // Application installed using "sudo make install"
       "/usr/share/pigami/resources",
